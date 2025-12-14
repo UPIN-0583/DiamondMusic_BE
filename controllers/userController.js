@@ -169,3 +169,54 @@ exports.removeFavouritedArtist = async (req, res) => {
     });
   }
 };
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const user_id = req.user_id;
+    const { username, avatar_url } = req.body;
+    if (!username) {
+      return res.json({ success: false, message: "Username is required" });
+    }
+    const updatedUser = await User.updateProfile(user_id, username, avatar_url);
+    res.json({
+      success: true,
+      message: "Cập nhật thành công",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const user_id = req.user_id;
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res.json({ success: false, message: "Thiếu thông tin mật khẩu" });
+    }
+    await User.changePassword(user_id, oldPassword, newPassword);
+    res.json({
+      success: true,
+      message: "Đổi mật khẩu thành công",
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+exports.getUserStats = async (req, res) => {
+  try {
+    const user_id = req.user_id;
+    const stats = await User.getUserStats(user_id);
+    res.json({
+      success: true,
+      stats,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};

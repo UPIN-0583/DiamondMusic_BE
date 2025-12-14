@@ -15,3 +15,20 @@ exports.getArtists = async (req, res) => {
     });
   }
 };
+
+exports.getArtistDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const songs = await Artist.getArtistSongs(id);
+    res.json({
+      success: true,
+      songs,
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

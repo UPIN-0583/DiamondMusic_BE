@@ -15,3 +15,20 @@ exports.getGPlaylists = async (req, res) => {
     });
   }
 };
+
+exports.getPlaylistDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const songs = await GPlaylist.getGPlaylistSongs(id);
+    res.json({
+      success: true,
+      songs,
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

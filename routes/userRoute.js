@@ -6,6 +6,7 @@ const userController = require("../controllers/userController");
 
 router.get("/user-info", authUser, userController.getUserInfo);
 router.get("/liked-songs", authUser, userController.getUserLikedSongs);
+router.get("/liked-artists", authUser, userController.getUserLikedArtists);
 router.post("/register", userController.userRegister);
 router.post("/login", userController.userLogin);
 router.post("/add-favourite-song", authUser, userController.addFavouritedSong);
@@ -24,5 +25,8 @@ router.delete(
   authUser,
   userController.removeFavouritedArtist
 );
+router.put("/update-profile", authUser, userController.updateProfile);
+router.put("/change-password", authUser, userController.changePassword);
+router.get("/stats", authUser, userController.getUserStats);
 
 module.exports = router;

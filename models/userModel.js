@@ -76,7 +76,7 @@ const User = {
         },
       };
     } else {
-      throw new Error("Sai mật khẩu");
+      throw new Error("Tài khoản hoặc mật khẩu không chính xác");
     }
   },
 
@@ -127,6 +127,12 @@ WHERE u.user_id = ${user_id}
 
   // api to add favourite songs
   addFavouritedSong: async (user_id, song_id) => {
+    // Check if already liked
+    const exists =
+      await db`select * from likes where user_id = ${user_id} and song_id = ${song_id}`;
+    if (exists.length > 0) {
+      return { alreadyExists: true, ...exists[0] };
+    }
     const result =
       await db`insert into likes (user_id, song_id) values (${user_id}, ${song_id}) returning *`;
     return result[0];
@@ -149,6 +155,12 @@ WHERE u.user_id = ${user_id}
 
   // api to add favourite artist
   addFavouritedArtist: async (user_id, artist_id) => {
+    // Check if already following
+    const exists =
+      await db`select * from favourite_artist where user_id = ${user_id} and artist_id = ${artist_id}`;
+    if (exists.length > 0) {
+      return { alreadyExists: true, ...exists[0] };
+    }
     const result =
       await db`insert into favourite_artist (user_id, artist_id) values (${user_id}, ${artist_id}) returning *`;
     return result[0];
@@ -159,6 +171,51 @@ WHERE u.user_id = ${user_id}
     const result =
       await db`delete from favourite_artist where user_id = ${user_id} and artist_id = ${artist_id} returning * `;
     return result[0];
+  },
+
+  // api to change password
+  changePassword: async (user_id, oldPassword, newPassword) => {
+    // Get current user
+    const userResult = await db`select * from users where user_id = ${user_id}`;
+    if (userResult.length === 0) {
+      throw new Error("User not found");
+    }
+    const user = userResult[0];
+
+    // Verify old password
+    const bcrypt = require("bcrypt");
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      throw new Error("Mật khẩu cũ không đúng");
+    }
+
+    // Validate new password
+    if (newPassword.length < 8) {
+      throw new Error("Mật khẩu mới phải có ít nhất 8 ký tự");
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    await db`update users set password = ${hashedPassword} where user_id = ${user_id}`;
+    return { success: true };
+  },
+
+  // api to get user stats
+  getUserStats: async (user_id) => {
+    const likedSongs =
+      await db`select count(*) as count from likes where user_id = ${user_id}`;
+    const likedArtists =
+      await db`select count(*) as count from favourite_artist where user_id = ${user_id}`;
+    const playlists =
+      await db`select count(*) as count from playlists where user_id = ${user_id}`;
+    return {
+      likedSongsCount: parseInt(likedSongs[0].count) || 0,
+      likedArtistsCount: parseInt(likedArtists[0].count) || 0,
+      playlistsCount: parseInt(playlists[0].count) || 0,
+    };
   },
 };
 
