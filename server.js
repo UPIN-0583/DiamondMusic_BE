@@ -27,6 +27,7 @@ const artistRouter = require("./routes/artistRoute.js");
 const albumRouter = require("./routes/albumRoute.js");
 const userRouter = require("./routes/userRoute.js");
 const aiRecommendationRouter = require("./routes/aiRecommendationRoute.js");
+const lyricsRouter = require("./routes/lyricsRoute.js");
 
 app.use("/api/song", songRouter);
 app.use("/api/playlist", playlistRouter);
@@ -36,6 +37,7 @@ app.use("/api/artist", artistRouter);
 app.use("/api/album", albumRouter);
 app.use("/api/user", userRouter);
 app.use("/api/ai", aiRecommendationRouter);
+app.use("/api/lyrics", lyricsRouter);
 
 app.listen(5000, () => {
   console.log("Server is running at port", PORT);
