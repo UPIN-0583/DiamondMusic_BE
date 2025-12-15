@@ -1,10 +1,21 @@
 const { db } = require("../config/db");
 
 const Playlist = {
-  // api for get user playlists
+  // api for get user playlists with computed cover image
   getAll: async (user_id) => {
     const result = await db`
-      select p.playlist_id, p.name, p.user_id,
+      select p.playlist_id, p.name, p.user_id, p.image_url,
+      -- Computed cover image with priority: custom image > first song image
+      COALESCE(
+        p.image_url,
+        (
+          select s.image_url 
+          from playlist_songs ps 
+          join songs s on ps.song_id = s.song_id 
+          where ps.playlist_id = p.playlist_id 
+          limit 1
+        )
+      ) as cover_image,
       (
         select coalesce(json_agg(
           json_build_object(
@@ -12,7 +23,8 @@ const Playlist = {
             'title', s.title,
             'artist', a.name,
             'artist_id', a.artist_id,
-            'image', a.image_url,
+            'image', s.image_url,
+            'artist_image', a.image_url,
             'url', s.audio_url,
             'id', s.song_id::text,
             'duration', s.duration

@@ -120,7 +120,7 @@ WHERE u.user_id = ${user_id}
   // api to get favourite songs
   getLikedSongs: async (user_id) => {
     const result =
-      await db`select s.song_id, s.title, a.name, a.image_url, s.duration, s.audio_url, s.views from likes l join songs s on l.song_id = s.song_id 
+      await db`select s.song_id, s.title, a.name, a.image_url as artist_image_url, s.image_url, s.duration, s.audio_url, s.views from likes l join songs s on l.song_id = s.song_id 
     join artists a on a.artist_id = s.artist_id where user_id = ${user_id}`;
     return result;
   },
